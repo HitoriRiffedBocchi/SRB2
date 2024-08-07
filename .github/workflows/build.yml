@@ -25,17 +25,21 @@ jobs:
           cd emsdk
           ./emsdk install latest
           ./emsdk activate latest
-          source ./emsdk_env.sh
+          echo "source $(pwd)/emsdk_env.sh" >> $GITHUB_ENV
+
+      - name: Create build directory
+        run: mkdir build
 
       - name: Build SRB2
         run: |
-          source emsdk/emsdk_env.sh
-          emcmake cmake .
+          source $GITHUB_ENV
+          cd build
+          emcmake cmake ..
           emmake make
-          emcc -O2 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s USE_SDL_MIXER=2 -o srb2.html src/main.c
+          emcc -O2 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s USE_SDL_MIXER=2 -o srb2.html ../src/main.c
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # Adjust to your build output directory
+          publish_dir: ./build  # Adjust to your build output directory
