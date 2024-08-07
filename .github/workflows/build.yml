@@ -13,17 +13,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Emscripten environment
-        uses: trzeci/emscripten@v1.39.0
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake make build-essential
           sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 
+      - name: Set up Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
+          source ./emsdk_env.sh
+
       - name: Build SRB2
         run: |
+          source emsdk/emsdk_env.sh
           emcmake cmake .
           emmake make
           emcc -O2 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s USE_SDL_MIXER=2 -o srb2.html src/main.c
